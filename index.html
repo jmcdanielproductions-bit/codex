@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Codex - Document Builder</title>
+<title>Matrix - Document Builder</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -271,15 +271,15 @@ body{display:flex;flex-direction:column;background:var(--ui)}
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 
-@keyframes codexFadeUp{
+@keyframes matrixFadeUp{
   from{opacity:0;transform:translateY(6px)}
   to{opacity:1;transform:translateY(0)}
 }
-@keyframes codexFade{
+@keyframes matrixFade{
   from{opacity:0}
   to{opacity:1}
 }
-@keyframes codexModalIn{
+@keyframes matrixModalIn{
   from{opacity:0;transform:translateY(4px) scale(.992)}
   to{opacity:1;transform:translateY(0) scale(1)}
 }
@@ -534,12 +534,12 @@ body{display:flex;flex-direction:column;background:var(--ui)}
 .autosave-toast{position:fixed;bottom:18px;right:18px;background:var(--uip);border:1px solid var(--pu);border-radius:6px;padding:8px 14px;font-size:10.5px;color:var(--pu-m);z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
 .autosave-toast.show{opacity:1}
 .proj-panel{will-change:transform}
-.form-panel-inner>.fs{animation:codexFadeUp .2s ease both}
+.form-panel-inner>.fs{animation:matrixFadeUp .2s ease both}
 .form-panel-inner>.fs:nth-child(2){animation-delay:.02s}
 .form-panel-inner>.fs:nth-child(3){animation-delay:.04s}
-.preview-panel .pg{animation:codexFadeUp .26s ease both}
-.modal{animation:codexModalIn .18s ease both}
-.proj-overlay.open{animation:codexFade .2s ease both}
+.preview-panel .pg{animation:matrixFadeUp .26s ease both}
+.modal{animation:matrixModalIn .18s ease both}
+.proj-overlay.open{animation:matrixFade .2s ease both}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
@@ -571,7 +571,7 @@ body{display:flex;flex-direction:column;background:var(--ui)}
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <span class="tb-brand">CODEX</span>
+  <span class="tb-brand">MATRIX</span>
   <div class="tb-sep"></div>
   <button class="tb-btn" id="projToggleBtn" onclick="toggleProjPanel()">Projects</button>
   <div class="tb-sep"></div>
@@ -993,7 +993,7 @@ function markDirty(){
 function syncProjectChrome(){
   ensureProjectShape(S);
   document.getElementById('tbProjName').textContent=currentProjectMeta.name||'Untitled Project';
-  document.title='Codex - '+(currentProjectMeta.name||'Untitled Project');
+  document.title='Matrix - '+(currentProjectMeta.name||'Untitled Project');
   const density=document.getElementById('densityMode');
   if(density)density.value=getDensityMode();
 }
@@ -1394,10 +1394,10 @@ function openExportModal(){document.getElementById('exportModal').classList.remo
 function closeExportModal(){document.getElementById('exportModal').classList.add('hidden');}
 function exportProjectFile(mode){
   const stamp=new Date().toISOString();
-  const safe=(currentProjectMeta.name||'codex').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||'codex';
+  const safe=(currentProjectMeta.name||'matrix').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||'matrix';
   const payload=mode==='full'
-    ? {kind:'codex-full-project',version:'3.1',exportedAt:stamp,project:{name:currentProjectMeta.name||'Untitled Project',tags:[...(currentProjectMeta.tags||[])],coverImg:currentProjectMeta.coverImg||null,folderId:currentProjectMeta.folderId||null},data:S}
-    : {kind:'codex-document',version:'3.1',exportedAt:stamp,data:S};
+    ? {kind:'matrix-full-project',version:'3.1',exportedAt:stamp,project:{name:currentProjectMeta.name||'Untitled Project',tags:[...(currentProjectMeta.tags||[])],coverImg:currentProjectMeta.coverImg||null,folderId:currentProjectMeta.folderId||null},data:S}
+    : {kind:'matrix-document',version:'3.1',exportedAt:stamp,data:S};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -1412,8 +1412,8 @@ function importProject(e){
     try{
       const loaded=JSON.parse(ev.target.result);
       const id=uid();
-      const isFull=loaded.kind==='codex-full-project';
-      const isDocument=loaded.kind==='codex-document';
+      const isFull=loaded.kind==='matrix-full-project'||loaded.kind==='codex-full-project';
+      const isDocument=loaded.kind==='matrix-document'||loaded.kind==='codex-document';
       const incomingData=ensureProjectShape(isFull||isDocument?loaded.data:loaded);
       const importedName=isFull?(loaded.project?.name||incomingData?.overview?.title||f.name.replace('.json','')):(incomingData?.overview?.title||f.name.replace('.json',''));
       const proj={id,name:importMode==='full'&&isFull?importedName:importedName,data:incomingData,tags:importMode==='full'&&isFull?[...(loaded.project?.tags||[])]:[],coverImg:importMode==='full'&&isFull?(loaded.project?.coverImg||null):null,folderId:importMode==='full'&&isFull?(loaded.project?.folderId||null):null,createdAt:Date.now(),updatedAt:Date.now()};
@@ -1658,7 +1658,7 @@ function toggleSection(id,forceOn=null){S.sectionVisible[id]=forceOn!==null?forc
 // ═══════════════════════════════════════════
 const forms={
 cover:()=>`<div class="fs"><div class="fs-title">🎬 Cover Page</div>
-<div class="field"><label>Theme</label><select onchange="S.cover.theme=this.value;renderPreview()"><option value="tomori" ${(S.cover.theme||'tomori')==='tomori'?'selected':''}>Codex Dark (Purple)</option><option value="mono" ${S.cover.theme==='mono'?'selected':''}>Mono (Black &amp; White)</option></select></div>
+<div class="field"><label>Theme</label><select onchange="S.cover.theme=this.value;renderPreview()"><option value="tomori" ${(S.cover.theme||'tomori')==='tomori'?'selected':''}>Matrix Dark (Purple)</option><option value="mono" ${S.cover.theme==='mono'?'selected':''}>Mono (Black &amp; White)</option></select></div>
 ${f('Eyebrow Label','cover','eyebrow')}${fa('Main Title (\\n for line break)','cover','title')}${f('Subtitle','cover','subtitle')}${fa('Description','cover','desc')}
 <div class="field-row">${f('Type','cover','type')}${f('Version','cover','version')}</div>
 <div class="field-row">${f('Date','cover','date')}${f('Status','cover','status')}</div></div>
@@ -1873,7 +1873,7 @@ function renderPreview(){
   const densityVars=densityVarsCss();
   let pgNum=1;
   const hdr=()=>`<div class="pg-hdr"><span class="pg-hdr-brand" style="color:${innerAccent}">${esc(S.cover.type)}</span><span class="pg-hdr-meta">${esc(S.overview.title)}</span></div><div class="pg-hdr-rule" style="background:${innerAccent}33"></div>`;
-  const ftr=(n,extra='')=>`<div class="pg-ftr"><span class="pg-ftr-brand">CODEX</span><span class="pg-ftr-meta">Confidential${extra}</span><span class="pg-ftr-num" style="color:${innerAccent}">${n}</span></div>`;
+  const ftr=(n,extra='')=>`<div class="pg-ftr"><span class="pg-ftr-brand">MATRIX</span><span class="pg-ftr-meta">Confidential${extra}</span><span class="pg-ftr-num" style="color:${innerAccent}">${n}</span></div>`;
   const vis=id=>S.sectionVisible[id];
   const pg=(sectionId,content,extraClass='')=>`<div class="${['pg',docCls,`density-${densityMode}`,extraClass].filter(Boolean).join(' ')}" data-section="${sectionId}" style="${densityVars}">${content}</div>`;
   const pm=estimatePageMap();
@@ -1883,7 +1883,7 @@ function renderPreview(){
   html+=`<div class="pg cov-pg t-${th} density-${densityMode}" data-section="cover" style="${densityVars}"><div class="cov-geo">${S.cover.bgImg?`<img class="cov-bg-img" src="${S.cover.bgImg}"><div class="cov-scrim"></div>`:''}<div class="g-r g-r1"></div><div class="g-r g-r2"></div><div class="g-r g-r3"></div><div class="g-lh"></div><div class="g-lv"></div></div>
 <div class="cov-body"><div class="cov-ey">${esc(S.cover.eyebrow)}</div><div class="cov-ttl">${titleLines.map(l=>esc(l)).join('<br>')}</div><div class="cov-sub">${esc(S.cover.subtitle)}</div><div class="cov-desc">${descHtml}</div>
 <div class="cov-meta"><div class="mp"><span class="mp-l">Type</span><span class="mp-v">${esc(S.cover.type)}</span></div><div class="mp"><span class="mp-l">Version</span><span class="mp-v">${esc(S.cover.version)}</span></div><div class="mp"><span class="mp-l">Date</span><span class="mp-v">${esc(S.cover.date)}</span></div><div class="mp"><span class="mp-l">Status</span><span class="mp-v">${esc(S.cover.status)}</span></div></div></div>
-<div class="cov-strip"><span class="cov-strip-b">CODEX</span><span class="cov-strip-p">${n}</span></div></div>`;}
+<div class="cov-strip"><span class="cov-strip-b">MATRIX</span><span class="cov-strip-p">${n}</span></div></div>`;}
 
   if(vis('toc')){const n=String(pgNum++).padStart(2,'0');
   const tocRows=SECTIONS.filter(sec=>S.sectionVisible[sec.id]&&sec.id!=='toc').map(sec=>`<div class="toc-entry"><span class="toc-num">${String(pm[sec.id]).padStart(2,'0')}</span><span class="toc-icon">${sec.icon}</span><span class="toc-label">${sec.label}</span><span class="toc-dots"></span><span class="toc-pg">${pm[sec.id]}</span></div>`).join('');
